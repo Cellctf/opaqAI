@@ -1,0 +1,5 @@
+gunicorn
+gevent
+flask
+torch==2.1.2
+hanlp[full]
