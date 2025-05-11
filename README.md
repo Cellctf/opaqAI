@@ -1,5 +1,5 @@
 # opaqAI
-A compact AI for Redaction with website GUI
+A compact AI for redaction with website GUI
 
 This is a simple AI application that helps you mask sensitive information. Runs on port :8000
 
