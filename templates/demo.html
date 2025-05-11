@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>脱敏处理可视化演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .level-selector {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .level-option {
+            background: #f0f2f5;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .level-option:hover {
+            background: #e0e7ff;
+            border-color: #4a6cf7;
+        }
+
+        .level-option input[type="radio"] {
+            display: none;
+        }
+
+        .level-option input[type="radio"]:checked + span,
+        .level-option.selected {
+            font-weight: bold;
+            color: #4a6cf7;
+        }
+
+        .level-option.selected {
+            background: #e0e7ff;
+            border-color: #4a6cf7;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .custom-input:focus {
+            border-color: #4a6cf7;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-column {
+            flex: 1;
+        }
+
+        textarea.custom-input {
+            resize: none;
+            min-height: 100px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #3a5ae8;
+        }
+
+        .btn-primary {
+            background-color: #4a6cf7;
+        }
+
+        .btn-link {
+            background: none;
+            color: #4a6cf7;
+            text-decoration: underline;
+            padding: 5px 10px;
+        }
+
+        .btn-link:hover {
+            background: none;
+            color: #3a5ae8;
+        }
+
+        .visualization-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .token-visualization {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+            animation: tokenSlideIn 1s ease-out;
+        }
+
+        .token {
+            background: #e0e7ff;
+            border: 1px solid #c7d2fe;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: monospace;
+            display: inline-block;
+            opacity: 0;
+            animation: tokenFadeIn 1s forwards;
+        }
+
+        .token:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .token:nth-child(even) {
+            animation-delay: 1s;
+        }
+
+        .entity-visualization {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .entity-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            opacity: 0;
+            animation: entityFadeIn 1s forwards;
+        }
+
+        .entity-item:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .entity-item:nth-child(even) {
+            animation-delay: 1s;
+        }
+
+        .entity-text {
+            flex: 1;
+            font-family: monospace;
+        }
+
+        .entity-type {
+            background: #4a6cf7;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .entity-filtered {
+            margin-left: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .entity-processed {
+            margin-left: 10px;
+            color: #e74c3c;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .text-transition {
+            text-align: center;
+            font-size: 24px;
+            margin: 10px 0;
+            color: #888;
+        }
+        .text-display {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+        .text-highlight {
+            background-color: #ffe58f;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .text-replaced {
+            background-color: #95de64;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes tokenSlideIn {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes tokenFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes entityFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文本脱敏过程可视化</h1>
+        <p class="subtitle">深入了解文本分词、实体识别和脱敏替换的整个过程</p>
+        
+        <div class="form-group">
+            <a href="{{ url_for('index') }}" class="btn btn-link">返回主页</a>
+        </div>
+        
+        <form id="demo-form" method="post">
+            <div class="form-row">
+                <div class="form-column">
+                    <div class="form-group">
+                        <label for="input-text">示例文本：</label>
+                        <textarea id="input-text" name="input_text" class="custom-input" placeholder="请输入简短的示例文本，如：李明的身份证号是330102199003077635，电话是13812345678。">{{ input_text }}</textarea>
+                    </div>
+                </div>
+                <div class="form-column">
+                    <div class="form-group">
+                        <label for="replacement-text">自定义替换内容：</label>
+                        <input type="text" id="replacement-text" name="replacement_text" class="custom-input" placeholder="默认：[Secret]" value="{{ replacement_text }}">
+                    </div>
+                    <div class="form-group">
+                        <label>选择脱敏等级：</label>
+                        <div class="level-selector">
+                            <label class="level-option" id="basic-option" title="基础：只屏蔽实名信息">
+                                <input type="radio" name="desensitize_scope" value="basic" {% if desensitize_scope == 'basic' %}checked{% endif %}>
+                                <span>基础</span>
+                            </label>
+                            <label class="level-option" id="enhanced-option" title="增强：只屏蔽敏感信息">
+                                <input type="radio" name="desensitize_scope" value="enhanced" {% if desensitize_scope == 'enhanced' %}checked{% endif %}>
+                                <span>增强</span>
+                            </label>
+                            <label class="level-option" id="full-option" title="全面：屏蔽所有相关信息">
+                                <input type="radio" name="desensitize_scope" value="full" {% if desensitize_scope == 'full' %}checked{% endif %}>
+                                <span>全面</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 23px;">
+                        <button type="submit" class="btn btn-primary">可视化处理过程</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {% if processing_result %}
+        <div class="visualization-container">
+            <div class="section">
+                <h2 class="section-title">步骤 1: 分词结果</h2>
+                <p>将原始文本切分为单独的语言单元（tokens）：</p>
+                <div class="token-visualization">
+                    {% for token in processing_result.tokens %}
+                    <span class="token">{{ token }}</span>
+                    {% endfor %}
+                </div>
+                <div class="note">总计: {{ processing_result.tokens|length }} 个词元</div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">步骤 2: 实体识别结果</h2>
+                <p>识别出文本中的各类命名实体：</p>
+                <!-- In the entity visualization section, replace this part: -->
+                <div class="entity-visualization">
+                    {% for entity in processing_result.all_entities %}
+                    <div class="entity-item">
+                        <div class="entity-text">"{{ entity.text }}"</div>
+                        <div class="entity-type {{ entity.type }}">{{ entity.type }}</div>
+                        {% if entity in processing_result.filtered_entities %}
+                        <div class="entity-processed">(当前级别将被处理)</div>
+                        {% else %}
+                        <div class="entity-filtered">(当前级别不被处理)</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="note">总计: {{ processing_result.all_entities|length }} 个实体，其中 {{ processing_result.filtered_entities|length }} 个将被脱敏</div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">步骤 3: 替换过程</h2>
+                <p>根据识别的实体，从后往前逐个处理：</p>
+                <div class="replacement-steps">
+                    {% for step in processing_result.replacement_steps %}
+                    <div class="step">
+                        <div class="step-header">
+                            <div class="step-title">替换步骤 {{ loop.index }}</div>
+                            <div class="step-entity">
+                                <span>将实体:</span>
+                                <span class="entity-text">"{{ step.entity.text }}"</span>
+                                <span class="entity-type {{ step.entity.type }}">{{ step.entity.type }}</span>
+                                <span>替换为: "{{ replacement_text }}"</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-display text-before">
+                            {% set text = step.before %}
+                            {% set start = step.entity.start %}
+                            {% set end = step.entity.end %}
+                            {{ text[:start] }}<span class="text-highlight">{{ text[start:end] }}</span>{{ text[end:] }}
+                        </div>
+                        <div class="text-transition">
+                            ➔
+                        </div>
+                        <div class="text-display text-after">
+                            {% set text = step.after %}
+                            {% set start = step.entity.start %}
+                            {% set end = start + replacement_text|length %}
+                            {{ text[:start] }}<span class="text-replaced">{{ text[start:end] }}</span>{{ text[end:] }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="final-result">
+                <div class="final-title">最终脱敏结果</div>
+                <div class="final-text">{{ processing_result.final_text }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const radioButtons = document.querySelectorAll('input[name="desensitize_scope"]');
+            // 初始化选中状态
+            updateSelectedClass();
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', updateSelectedClass);
+            });
+
+            function updateSelectedClass() {
+                document.querySelectorAll('.level-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                document.querySelector(`input[name="desensitize_scope"]:checked`).parentElement.classList.add('selected');
+            }
+        });
+    </script>
+</body>
+</html>

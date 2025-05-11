@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="{{ url_for('static',filename='favicon.ico')}}">
+  <title>HACKER!</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    .left {
+      flex: 1;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .left img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .right {
+      flex: 1;
+      background-color: #ffffff;
+      padding: 10px;
+      overflow: auto;
+      display: flex;
+      flex-wrap: wrap; /* 重点：自动换行 */
+      align-content: flex-start;
+      align-items: flex-start;
+      border-left: 2px solid #ccc;
+      cursor: crosshair;
+    }
+    .text-item {
+      margin: 5px;
+      font-size: 16px;
+      white-space: nowrap; /* 不换行 */
+    }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <img src="{{ url_for('static',filename='error.jpg')}}" alt="示例图片">
+  </div>
+  <div class="right" id="right-area">
+    <!-- 动态插入文字 -->
+  </div>
+
+  <script>
+    const rightArea = document.getElementById('right-area');
+    let counter = 1;
+
+    rightArea.addEventListener('mousemove', () => {
+      const span = document.createElement('span');
+      span.className = 'text-item';
+      if (counter % 2 === 1) {
+        span.classList.add('odd');    
+        span.textContent = `STOP DDOS!`;
+      } else {
+        span.classList.add('even'); 
+        span.textContent = `STOP HACK!`;
+      }
+      rightArea.appendChild(span);
+      counter++;
+    });
+  </script>
+</body>
+</html>
