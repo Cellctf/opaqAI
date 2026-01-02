@@ -1,0 +1,7 @@
+.venv/
+
+__pycache__/
+
+REFACTORING_SUMMARY.md
+
+.env.example
